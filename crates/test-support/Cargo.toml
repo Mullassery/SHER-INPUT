@@ -1,0 +1,13 @@
+[package]
+name = "sher_input_test"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Simulated SHER-Input backend and fixtures for tests and non-Linux development"
+
+[dependencies]
+sher_input_core = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }

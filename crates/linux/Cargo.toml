@@ -1,0 +1,17 @@
+[package]
+name = "sher_input_linux"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "SHER-Input Linux/evdev backend (section 25) — the first InputBackend implementation, kept isolated from sher_input_core"
+
+[dependencies]
+sher_input_core = { workspace = true }
+tracing = { workspace = true }
+
+# Linux-only: on any other host (this workspace is developed on macOS) these are not
+# even fetched, and the crate falls back to the `Unsupported` stub in src/unsupported.rs.
+[target.'cfg(target_os = "linux")'.dependencies]
+evdev = "0.12"

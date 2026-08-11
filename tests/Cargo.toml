@@ -1,0 +1,15 @@
+[package]
+name = "sher_input_integration_tests"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dev-dependencies]
+sher_input_core = { workspace = true }
+sher_input_test = { workspace = true }
+tokio = { workspace = true }

@@ -1,0 +1,36 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/core",
+    "crates/linux",
+    "crates/test-support",
+    "tools/sher-input-monitor",
+    "tests",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Georgi Mammen Mullassery <mullassery@gmail.com>"]
+license = "Proprietary License — Free to use with explicit attribution"
+repository = "https://github.com/Mullassery/SHER-INPUT"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+thiserror = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# SHER-Kernel (foundation types; input_driver stays a SHER-Kernel-internal
+# concern that SHER-Display used to reach past — SHER-Input now sits in
+# between and is the only thing allowed to depend on it)
+sher_common = { path = "../SHER-Kernel/crates/common" }
+
+# SHER-Input internal crates
+sher_input_core = { path = "crates/core" }
+sher_input_linux = { path = "crates/linux" }
+sher_input_test = { path = "crates/test-support" }

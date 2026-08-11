@@ -1,0 +1,20 @@
+[package]
+name = "sher-input-monitor"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "SHER-Input diagnostic tool (section 28): live normalized device/event stream, no backend-specific details"
+
+[[bin]]
+name = "sher-input-monitor"
+path = "src/main.rs"
+
+[dependencies]
+sher_input_core = { workspace = true }
+sher_input_linux = { workspace = true }
+sher_input_test = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

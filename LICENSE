@@ -1,0 +1,71 @@
+SHER Input License
+
+Copyright (c) 2026 Georgi Mammen Mullassery
+
+INTELLECTUAL PROPERTY AND USAGE TERMS
+
+SHER Input is the input subsystem of the SHER platform, transforming physical
+input-device activity into a normalized, routable event system for SHER-Display
+and the Aurora desktop environment.
+
+PERMITTED USE
+
+This software is made available for use, study, and modification under the following terms:
+
+1. Free to use with explicit attribution to Georgi Mammen Mullassery and the SHER project
+2. Permission granted to use, copy, modify, and distribute subject to these conditions:
+   - Clear and visible attribution to the original work is required in all copies or
+     substantial portions of the software
+   - Any derivative works or projects must clearly acknowledge SHER Input as the
+     foundational work
+   - The license text must accompany all distributions
+
+RESTRICTIONS
+
+You may not:
+- Remove or obscure copyright notices or attribution
+- Claim original authorship of the SHER Input architecture without proper attribution
+- Use this software in a way that removes or diminishes credit to the original author
+- Sublicense this work without maintaining the original attribution requirements
+
+DERIVATIVE WORKS
+
+If you create derivative works, modifications, or projects based on SHER Input:
+- You must include prominent notice of modifications made
+- You must maintain attribution to Georgi Mammen Mullassery and the SHER project
+- The source repository link (https://github.com/Mullassery/SHER-INPUT) must be referenced
+- Your derivative work must be clearly identified as such
+
+ACADEMIC AND RESEARCH USE
+
+Academic institutions and researchers are encouraged to use, study, and build upon this work
+with the requirement of proper citation and attribution in publications.
+
+COMMERCIAL USE
+
+Commercial use is permitted provided:
+- Proper attribution to the original work is maintained in documentation and source code
+- The source repository is referenced in any commercial product documentation
+- Users of commercial products derived from this work are informed of the original source
+
+LIABILITY
+
+THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+ATTRIBUTION REQUIREMENT
+
+All uses must include the following attribution:
+
+"This project is based on SHER Input by Georgi Mammen Mullassery
+(https://github.com/Mullassery/SHER-INPUT)"
+
+For more information, contact: mullassery@gmail.com
+
+---
+
+SHER Input: the nervous system of the SHER desktop.

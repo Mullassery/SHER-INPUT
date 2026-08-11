@@ -8,7 +8,6 @@ repository.workspace = true
 description = "SHER-Input canonical event model, device registry, and backend contract"
 
 [dependencies]
-sher_common = { workspace = true }
 tokio = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }

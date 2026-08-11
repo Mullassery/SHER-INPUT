@@ -114,10 +114,14 @@ code, or test fixtures — not one per device class for its own sake.
 
 ## Architectural boundary
 
-SHER-Input depends on `sher_common` (SHER-Kernel) as a read-only library dependency,
-matching the layering above. It does not modify SHER-Kernel, SHER-Graphics, or
-SHER-Display, and nothing in this repository does — the contract with SHER-Display is
-proven with a mock router in `tests/`, not by reaching into SHER-Display's own crate.
+SHER-Input does not modify — or currently even depend on — SHER-Kernel, SHER-Graphics,
+or SHER-Display. Its canonical types (`InputDeviceId`, `Error`, ...) are intentionally
+self-contained rather than reusing SHER-Kernel's `ObjectId`/`Error`, since exposing
+another subsystem's types through SHER-Input's public API would itself be a boundary
+violation. The contract with SHER-Display is proven with a mock router in `tests/`,
+not by reaching into SHER-Display's own crate. A real dependency on SHER-Kernel (e.g.
+for device handles from a future native backend) is expected eventually, but only gets
+added when a concrete need exists — not speculatively.
 
 ## License
 

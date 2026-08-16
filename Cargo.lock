@@ -397,7 +397,7 @@ dependencies = [
 
 [[package]]
 name = "sher-input-monitor"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sher_input_core",
  "sher_input_linux",
@@ -409,7 +409,7 @@ dependencies = [
 
 [[package]]
 name = "sher_input_core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "thiserror",
@@ -420,7 +420,7 @@ dependencies = [
 
 [[package]]
 name = "sher_input_integration_tests"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sher_input_core",
  "sher_input_test",
@@ -429,16 +429,17 @@ dependencies = [
 
 [[package]]
 name = "sher_input_linux"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "evdev",
  "sher_input_core",
+ "tokio",
  "tracing",
 ]
 
 [[package]]
 name = "sher_input_test"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "sher_input_core",
  "tokio",

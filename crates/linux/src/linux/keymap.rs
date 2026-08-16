@@ -105,6 +105,14 @@ pub fn map_key(key: Key) -> PhysicalKey {
     }
 }
 
+/// Linux kernel's `<linux/input-event-codes.h>` defines `BTN_MISC` (0x100) and
+/// `BTN_JOYSTICK` (0x120) as range boundaries, not individual buttons — the `evdev`
+/// crate's `Key` enum only exposes the named keys inside that range (`BTN_0`..`BTN_9`,
+/// `BTN_LEFT`..`BTN_TASK`), not the boundary constants themselves, so the range is
+/// reproduced here as raw codes.
+const BTN_MISC: u16 = 0x100;
+const BTN_JOYSTICK: u16 = 0x120;
+
 pub fn map_button(key: Key) -> Option<PointerButton> {
     match key {
         Key::BTN_LEFT => Some(PointerButton::Left),
@@ -112,9 +120,58 @@ pub fn map_button(key: Key) -> Option<PointerButton> {
         Key::BTN_MIDDLE => Some(PointerButton::Middle),
         Key::BTN_SIDE => Some(PointerButton::Back),
         Key::BTN_EXTRA => Some(PointerButton::Forward),
-        other if (Key::BTN_MISC.code()..Key::BTN_JOYSTICK.code()).contains(&other.code()) => {
-            Some(PointerButton::Other(other.code() as u8))
+        other if (BTN_MISC..BTN_JOYSTICK).contains(&other.code()) => {
+            Some(PointerButton::Other(other.code()))
         }
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn letter_and_digit_keys_map_to_their_named_variants() {
+        assert_eq!(map_key(Key::KEY_A), PhysicalKey::KeyA);
+        assert_eq!(map_key(Key::KEY_Z), PhysicalKey::KeyZ);
+        assert_eq!(map_key(Key::KEY_0), PhysicalKey::Digit0);
+        assert_eq!(map_key(Key::KEY_9), PhysicalKey::Digit9);
+    }
+
+    #[test]
+    fn an_unmapped_key_falls_back_to_other_carrying_its_raw_code() {
+        // KEY_KATAKANA has no named PhysicalKey variant; must not silently map onto an
+        // unrelated key, and must not panic.
+        let mapped = map_key(Key::KEY_KATAKANA);
+        assert_eq!(mapped, PhysicalKey::Other(Key::KEY_KATAKANA.code() as u32));
+    }
+
+    #[test]
+    fn mouse_buttons_map_to_their_named_pointer_button_variants() {
+        assert_eq!(map_button(Key::BTN_LEFT), Some(PointerButton::Left));
+        assert_eq!(map_button(Key::BTN_RIGHT), Some(PointerButton::Right));
+        assert_eq!(map_button(Key::BTN_MIDDLE), Some(PointerButton::Middle));
+        assert_eq!(map_button(Key::BTN_SIDE), Some(PointerButton::Back));
+        assert_eq!(map_button(Key::BTN_EXTRA), Some(PointerButton::Forward));
+    }
+
+    #[test]
+    fn misc_button_codes_in_range_map_to_other_with_the_raw_code_preserved() {
+        // BTN_0 (0x100) is the first code in the BTN_MISC..BTN_JOYSTICK range and has
+        // no named PointerButton variant — must come back as `Other` carrying the
+        // exact evdev code, not a truncated or reinterpreted one (this range used to
+        // be computed from `Key::BTN_MISC`/`Key::BTN_JOYSTICK`, constants that do not
+        // actually exist on `evdev::Key` — a bug only a real Linux compile surfaced).
+        assert_eq!(
+            map_button(Key::BTN_0),
+            Some(PointerButton::Other(Key::BTN_0.code()))
+        );
+        assert_eq!(Key::BTN_0.code(), 0x100);
+    }
+
+    #[test]
+    fn a_letter_key_is_not_mistaken_for_a_pointer_button() {
+        assert_eq!(map_button(Key::KEY_A), None);
     }
 }

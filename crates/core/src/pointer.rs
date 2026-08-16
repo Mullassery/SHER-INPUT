@@ -9,7 +9,12 @@ pub enum PointerButton {
     Middle,
     Back,
     Forward,
-    Other(u8),
+    /// Escape hatch for a backend-reported button code with no named variant above.
+    /// Carries the raw code purely for diagnostics (mirrors
+    /// [`PhysicalKey::Other`](crate::keyboard::PhysicalKey::Other)) — never matched on
+    /// by application logic. `u16` because Linux evdev's `BTN_*` misc/joystick/gamepad
+    /// range (0x100-0x2ff) does not fit in a `u8` without silently colliding codes.
+    Other(u16),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -33,10 +38,22 @@ pub struct NormalizedPosition {
 /// never a lossy merge of both.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum PointerEvent {
-    MotionRelative { dx: f64, dy: f64 },
-    MotionAbsolute { position: NormalizedPosition },
-    Button { button: PointerButton, pressed: bool },
-    Scroll { axis: ScrollAxis, delta: f64, high_resolution: bool },
+    MotionRelative {
+        dx: f64,
+        dy: f64,
+    },
+    MotionAbsolute {
+        position: NormalizedPosition,
+    },
+    Button {
+        button: PointerButton,
+        pressed: bool,
+    },
+    Scroll {
+        axis: ScrollAxis,
+        delta: f64,
+        high_resolution: bool,
+    },
     Enter,
     Leave,
 }

@@ -6,7 +6,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-const INPUT_DIR: &str = "/dev/input";
 const POLL_INTERVAL: Duration = Duration::from_millis(500);
 
 /// SHER-Input's first backend (section 25): translates `/dev/input/eventN` nodes into
@@ -27,7 +26,11 @@ impl InputBackend for LinuxBackend {
         "sher_input_linux::LinuxBackend"
     }
 
-    fn spawn(self: Box<Self>, sink: BackendEventSink, running: Arc<AtomicBool>) -> Result<std::thread::JoinHandle<()>> {
+    fn spawn(
+        self: Box<Self>,
+        sink: BackendEventSink,
+        running: Arc<AtomicBool>,
+    ) -> Result<std::thread::JoinHandle<()>> {
         std::thread::Builder::new()
             .name("sher-input-linux-supervisor".to_string())
             .spawn(move || supervise(sink, running))
@@ -55,7 +58,11 @@ fn supervise(sink: BackendEventSink, running: Arc<AtomicBool>) {
     }
 }
 
-fn scan_and_report_new(sink: &BackendEventSink, running: &Arc<AtomicBool>, known: &mut HashMap<PathBuf, InputDeviceId>) {
+fn scan_and_report_new(
+    sink: &BackendEventSink,
+    running: &Arc<AtomicBool>,
+    known: &mut HashMap<PathBuf, InputDeviceId>,
+) {
     for (path, dev) in evdev::enumerate() {
         if known.contains_key(&path) {
             continue;
@@ -71,7 +78,10 @@ fn scan_and_report_new(sink: &BackendEventSink, running: &Arc<AtomicBool>, known
             .name(format!("sher-input-reader-{device_id}"))
             .spawn(move || reader::run(device_id, dev, reader_sink, reader_running));
         if let Err(err) = spawned {
-            tracing::warn!("sher_input_linux: failed to spawn reader thread for {}: {err}", path.display());
+            tracing::warn!(
+                "sher_input_linux: failed to spawn reader thread for {}: {err}",
+                path.display()
+            );
         }
     }
 }

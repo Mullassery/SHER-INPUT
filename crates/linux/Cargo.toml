@@ -15,3 +15,9 @@ tracing = { workspace = true }
 # even fetched, and the crate falls back to the `Unsupported` stub in src/unsupported.rs.
 [target.'cfg(target_os = "linux")'.dependencies]
 evdev = "0.12"
+
+# Only needed to build a `BackendEventSink` in `reader`'s unit tests, which construct
+# synthetic evdev events and assert on what gets sent — no tokio runtime is started,
+# `mpsc::unbounded_channel` works on a bare executor-less thread.
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+tokio = { workspace = true }

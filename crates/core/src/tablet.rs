@@ -15,12 +15,18 @@ pub enum TabletTool {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum TabletEvent {
-    Proximity { tool: TabletTool, entering: bool },
+    Proximity {
+        tool: TabletTool,
+        entering: bool,
+    },
     Motion {
         position: NormalizedPosition,
         pressure: f32,
         tilt_x: f32,
         tilt_y: f32,
     },
-    Button { button: u8, pressed: bool },
+    Button {
+        button: u8,
+        pressed: bool,
+    },
 }

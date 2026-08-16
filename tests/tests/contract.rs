@@ -5,8 +5,8 @@
 //! own test suite must prove its contract without reaching into a sibling repository.
 
 use sher_input_core::{
-    CaptureKind, InputConfig, InputDeviceId, InputEvent, InputEventPayload, InputService, KeyAction, LogicalKey,
-    PhysicalKey, PointerEvent,
+    CaptureKind, InputConfig, InputDeviceId, InputEvent, InputEventPayload, InputService,
+    KeyAction, LogicalKey, PhysicalKey, PointerEvent,
 };
 use sher_input_test::SimulatedController;
 use std::collections::HashMap;
@@ -40,7 +40,9 @@ impl MockDisplayRouter {
                     return;
                 }
                 match self.keyboard_focus {
-                    Some(surface) => self.delivered.push(Delivery::ToSurface(surface, format!("{:?}", k.logical_key))),
+                    Some(surface) => self
+                        .delivered
+                        .push(Delivery::ToSurface(surface, format!("{:?}", k.logical_key))),
                     None => self.delivered.push(Delivery::Dropped),
                 }
             }
@@ -51,7 +53,9 @@ impl MockDisplayRouter {
                 // is happening, it just kept streaming normalized motion.
                 let target = captured_pointer_owner.or(self.pointer_over);
                 match target {
-                    Some(surface) => self.delivered.push(Delivery::ToSurface(surface, "motion".to_string())),
+                    Some(surface) => self
+                        .delivered
+                        .push(Delivery::ToSurface(surface, "motion".to_string())),
                     None => self.delivered.push(Delivery::Dropped),
                 }
             }
@@ -60,10 +64,15 @@ impl MockDisplayRouter {
     }
 }
 
-async fn next_payload_event(events: &mut tokio::sync::broadcast::Receiver<InputEvent>) -> InputEvent {
+async fn next_payload_event(
+    events: &mut tokio::sync::broadcast::Receiver<InputEvent>,
+) -> InputEvent {
     loop {
         let event = events.recv().await.unwrap();
-        if !matches!(event.payload, InputEventPayload::DeviceAdded(_) | InputEventPayload::DeviceRemoved(_)) {
+        if !matches!(
+            event.payload,
+            InputEventPayload::DeviceAdded(_) | InputEventPayload::DeviceRemoved(_)
+        ) {
             return event;
         }
     }
@@ -92,13 +101,22 @@ async fn focused_surface_receives_its_own_keys_only() {
     let controller = SimulatedController::new(service.sink());
     let kb = controller.add_keyboard("Test Keyboard");
 
-    let mut router = MockDisplayRouter { keyboard_focus: Some("surface-42"), ..Default::default() };
+    let mut router = MockDisplayRouter {
+        keyboard_focus: Some("surface-42"),
+        ..Default::default()
+    };
     controller.tap_key(kb, PhysicalKey::KeyA);
 
     let event = next_payload_event(&mut events).await;
     router.route(&event, None);
 
-    assert_eq!(router.delivered, vec![Delivery::ToSurface("surface-42", format!("{:?}", LogicalKey::Character('a')))]);
+    assert_eq!(
+        router.delivered,
+        vec![Delivery::ToSurface(
+            "surface-42",
+            format!("{:?}", LogicalKey::Character('a'))
+        )]
+    );
 }
 
 #[tokio::test]
@@ -108,8 +126,13 @@ async fn global_shortcut_intercepts_before_focused_surface() {
     let controller = SimulatedController::new(service.sink());
     let kb = controller.add_keyboard("Test Keyboard");
 
-    let mut router = MockDisplayRouter { keyboard_focus: Some("some-app"), ..Default::default() };
-    router.global_shortcuts.insert((true, false, PhysicalKey::KeyT), "aurora.launcher.open");
+    let mut router = MockDisplayRouter {
+        keyboard_focus: Some("some-app"),
+        ..Default::default()
+    };
+    router
+        .global_shortcuts
+        .insert((true, false, PhysicalKey::KeyT), "aurora.launcher.open");
 
     controller.press_key(kb, PhysicalKey::ControlLeft);
     controller.tap_key(kb, PhysicalKey::KeyT);
@@ -120,7 +143,10 @@ async fn global_shortcut_intercepts_before_focused_surface() {
     let t_down = next_payload_event(&mut events).await;
     router.route(&t_down, None);
 
-    assert_eq!(router.delivered[1], Delivery::GlobalShortcut("aurora.launcher.open"));
+    assert_eq!(
+        router.delivered[1],
+        Delivery::GlobalShortcut("aurora.launcher.open")
+    );
 }
 
 #[tokio::test]
@@ -130,12 +156,20 @@ async fn pointer_capture_overrides_hit_test_target_and_is_revocable() {
     let controller = SimulatedController::new(service.sink());
     let mouse = controller.add_mouse("Test Mouse");
 
-    let mut router = MockDisplayRouter { pointer_over: Some("window-under-cursor"), ..Default::default() };
+    let mut router = MockDisplayRouter {
+        pointer_over: Some("window-under-cursor"),
+        ..Default::default()
+    };
 
     // SHER-Display grabs the pointer for a drag — the interface SHER-Input exposes
     // for section 16, acquired here exactly as SHER-Display would.
     let guard = service
-        .request_capture(CaptureKind::Pointer, "window-being-dragged", "titlebar drag", None)
+        .request_capture(
+            CaptureKind::Pointer,
+            "window-being-dragged",
+            "titlebar drag",
+            None,
+        )
         .unwrap();
 
     controller.move_relative(mouse, 5.0, 5.0);
@@ -143,7 +177,13 @@ async fn pointer_capture_overrides_hit_test_target_and_is_revocable() {
     let owner = service.captures().owner_of(CaptureKind::Pointer);
     router.route(&motion, owner.as_deref().map(|_| "window-being-dragged"));
 
-    assert_eq!(router.delivered, vec![Delivery::ToSurface("window-being-dragged", "motion".to_string())]);
+    assert_eq!(
+        router.delivered,
+        vec![Delivery::ToSurface(
+            "window-being-dragged",
+            "motion".to_string()
+        )]
+    );
 
     drop(guard);
     assert!(!service.captures().is_captured(CaptureKind::Pointer));
@@ -152,7 +192,10 @@ async fn pointer_capture_overrides_hit_test_target_and_is_revocable() {
     let motion_after_release = next_payload_event(&mut events).await;
     router.route(&motion_after_release, None);
 
-    assert_eq!(router.delivered[1], Delivery::ToSurface("window-under-cursor", "motion".to_string()));
+    assert_eq!(
+        router.delivered[1],
+        Delivery::ToSurface("window-under-cursor", "motion".to_string())
+    );
 }
 
 #[tokio::test]

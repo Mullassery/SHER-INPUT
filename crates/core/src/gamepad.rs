@@ -39,7 +39,10 @@ pub enum GamepadAxis {
 /// SHER-Input, which only guarantees the raw signal is normalized and timestamped.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum GamepadEvent {
-    Button { button: GamepadButton, pressed: bool },
+    Button {
+        button: GamepadButton,
+        pressed: bool,
+    },
     /// Normalized to `[-1.0, 1.0]` for sticks and `[0.0, 1.0]` for triggers.
     Axis { axis: GamepadAxis, value: f32 },
 }

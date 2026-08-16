@@ -83,7 +83,10 @@ impl CaptureRegistry {
     }
 
     pub fn is_captured(&self, kind: CaptureKind) -> bool {
-        self.active.read().expect("capture lock poisoned").contains_key(&kind)
+        self.active
+            .read()
+            .expect("capture lock poisoned")
+            .contains_key(&kind)
     }
 
     pub fn pointer_grab_mode(&self) -> Option<PointerGrabMode> {

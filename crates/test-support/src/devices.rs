@@ -1,4 +1,7 @@
-use sher_input_core::{BackendMetadata, ConnectionState, InputDevice, InputDeviceCapabilities, InputDeviceClass, InputDeviceId};
+use sher_input_core::{
+    BackendMetadata, ConnectionState, InputDevice, InputDeviceCapabilities, InputDeviceClass,
+    InputDeviceId,
+};
 
 pub fn keyboard_device(name: impl Into<String>) -> InputDevice {
     InputDevice {

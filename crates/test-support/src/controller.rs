@@ -1,7 +1,7 @@
 use crate::devices::{keyboard_device, mouse_device, touchscreen_device};
 use sher_input_core::{
-    BackendEvent, BackendEventSink, ContactId, InputDeviceId, NormalizedPosition, PhysicalKey, PointerButton,
-    ScrollAxis, TouchEvent, TouchPhase,
+    BackendEvent, BackendEventSink, ContactId, InputDeviceId, NormalizedPosition, PhysicalKey,
+    PointerButton, ScrollAxis, TouchEvent, TouchPhase,
 };
 
 /// Drives an [`InputService`](sher_input_core::InputService) as if a real backend were
@@ -45,11 +45,19 @@ impl SimulatedController {
     }
 
     pub fn press_key(&self, device_id: InputDeviceId, key: PhysicalKey) {
-        self.sink.send(BackendEvent::Key { device_id, physical_key: key, pressed: true });
+        self.sink.send(BackendEvent::Key {
+            device_id,
+            physical_key: key,
+            pressed: true,
+        });
     }
 
     pub fn release_key(&self, device_id: InputDeviceId, key: PhysicalKey) {
-        self.sink.send(BackendEvent::Key { device_id, physical_key: key, pressed: false });
+        self.sink.send(BackendEvent::Key {
+            device_id,
+            physical_key: key,
+            pressed: false,
+        });
     }
 
     pub fn tap_key(&self, device_id: InputDeviceId, key: PhysicalKey) {
@@ -58,19 +66,31 @@ impl SimulatedController {
     }
 
     pub fn move_relative(&self, device_id: InputDeviceId, dx: f64, dy: f64) {
-        self.sink.send(BackendEvent::MotionRelative { device_id, dx, dy });
+        self.sink
+            .send(BackendEvent::MotionRelative { device_id, dx, dy });
     }
 
     pub fn move_absolute(&self, device_id: InputDeviceId, x: f64, y: f64) {
-        self.sink.send(BackendEvent::MotionAbsolute { device_id, position: NormalizedPosition { x, y } });
+        self.sink.send(BackendEvent::MotionAbsolute {
+            device_id,
+            position: NormalizedPosition { x, y },
+        });
     }
 
     pub fn press_button(&self, device_id: InputDeviceId, button: PointerButton) {
-        self.sink.send(BackendEvent::PointerButton { device_id, button, pressed: true });
+        self.sink.send(BackendEvent::PointerButton {
+            device_id,
+            button,
+            pressed: true,
+        });
     }
 
     pub fn release_button(&self, device_id: InputDeviceId, button: PointerButton) {
-        self.sink.send(BackendEvent::PointerButton { device_id, button, pressed: false });
+        self.sink.send(BackendEvent::PointerButton {
+            device_id,
+            button,
+            pressed: false,
+        });
     }
 
     pub fn click(&self, device_id: InputDeviceId, button: PointerButton) {
@@ -79,7 +99,12 @@ impl SimulatedController {
     }
 
     pub fn scroll(&self, device_id: InputDeviceId, axis: ScrollAxis, delta: f64) {
-        self.sink.send(BackendEvent::Scroll { device_id, axis, delta, high_resolution: false });
+        self.sink.send(BackendEvent::Scroll {
+            device_id,
+            axis,
+            delta,
+            high_resolution: false,
+        });
     }
 
     pub fn touch_down(&self, device_id: InputDeviceId, contact: ContactId, x: f64, y: f64) {

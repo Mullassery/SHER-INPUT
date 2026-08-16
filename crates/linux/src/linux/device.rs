@@ -1,5 +1,8 @@
 use evdev::{Device, Key, RelativeAxisType};
-use sher_input_core::{BackendMetadata, ConnectionState, InputDevice, InputDeviceCapabilities, InputDeviceClass, InputDeviceId};
+use sher_input_core::{
+    BackendMetadata, ConnectionState, InputDevice, InputDeviceCapabilities, InputDeviceClass,
+    InputDeviceId,
+};
 use std::path::Path;
 
 /// Classifies a raw evdev node the same way the kernel's own `libinput` roughly does:
@@ -13,7 +16,8 @@ pub fn describe(path: &Path, device: &Device) -> InputDevice {
     let rel_axes = device.supported_relative_axes();
     let abs_axes = device.supported_absolute_axes();
 
-    let has_letter_keys = keys.is_some_and(|k| k.contains(Key::KEY_A) || k.contains(Key::KEY_SPACE));
+    let has_letter_keys =
+        keys.is_some_and(|k| k.contains(Key::KEY_A) || k.contains(Key::KEY_SPACE));
     let has_pointer_buttons = keys.is_some_and(|k| k.contains(Key::BTN_LEFT));
     let has_relative_motion = rel_axes.is_some_and(|a| a.contains(RelativeAxisType::REL_X));
     let has_touch = keys.is_some_and(|k| k.contains(Key::BTN_TOUCH));
@@ -33,9 +37,13 @@ pub fn describe(path: &Path, device: &Device) -> InputDevice {
         keys: has_letter_keys,
         pointer_relative: has_relative_motion,
         pointer_absolute: has_absolute_motion && !has_touch,
-        scroll: rel_axes.is_some_and(|a| a.contains(RelativeAxisType::REL_WHEEL) || a.contains(RelativeAxisType::REL_HWHEEL)),
-        scroll_high_resolution: rel_axes
-            .is_some_and(|a| a.contains(RelativeAxisType::REL_WHEEL_HI_RES) || a.contains(RelativeAxisType::REL_HWHEEL_HI_RES)),
+        scroll: rel_axes.is_some_and(|a| {
+            a.contains(RelativeAxisType::REL_WHEEL) || a.contains(RelativeAxisType::REL_HWHEEL)
+        }),
+        scroll_high_resolution: rel_axes.is_some_and(|a| {
+            a.contains(RelativeAxisType::REL_WHEEL_HI_RES)
+                || a.contains(RelativeAxisType::REL_HWHEEL_HI_RES)
+        }),
         touch: has_touch,
         max_touch_contacts: if has_touch { 10 } else { 0 },
         tablet: false,
@@ -55,6 +63,9 @@ pub fn describe(path: &Path, device: &Device) -> InputDevice {
         backend_metadata: BackendMetadata::default()
             .insert("backend", "linux-evdev")
             .insert("bus_type", format!("{:?}", input_id.bus_type()))
-            .insert("phys", device.physical_path().unwrap_or("unknown").to_string()),
+            .insert(
+                "phys",
+                device.physical_path().unwrap_or("unknown").to_string(),
+            ),
     }
 }

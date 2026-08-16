@@ -27,16 +27,20 @@ pub use backend::{BackendEvent, BackendEventSink, BackendHandle, InputBackend};
 pub use capture::{CaptureGuard, CaptureId, CaptureKind, CaptureRegistry, PointerGrabMode};
 pub use coalesce::Coalescer;
 pub use config::{AccessibilityConfig, InputConfig, KeyboardConfig, PointerConfig, TouchConfig};
-pub use device::{BackendMetadata, ConnectionState, InputDevice, InputDeviceCapabilities, InputDeviceClass};
+pub use device::{
+    BackendMetadata, ConnectionState, InputDevice, InputDeviceCapabilities, InputDeviceClass,
+};
 pub use error::{Error, Result};
 pub use event::{InputEvent, InputEventPayload};
 pub use gamepad::{GamepadAxis, GamepadButton, GamepadEvent};
 pub use ids::{InputDeviceId, SequenceCounter, SequenceNumber, Timestamp};
 pub use keyboard::{
-    KeyAction, KeyboardEvent, KeyboardLayout, KeyboardState, KeyboardStateTable, LogicalKey, Modifiers,
-    PhysicalKey, UsQwertyLayout,
+    KeyAction, KeyboardEvent, KeyboardLayout, KeyboardState, KeyboardStateTable, LogicalKey,
+    Modifiers, PhysicalKey, UsQwertyLayout,
 };
-pub use pointer::{NormalizedPosition, PointerButton, PointerEvent, PointerState, PointerStateTable, ScrollAxis};
+pub use pointer::{
+    NormalizedPosition, PointerButton, PointerEvent, PointerState, PointerStateTable, ScrollAxis,
+};
 pub use registry::DeviceRegistry;
 pub use service::InputService;
 pub use source::{InputSource, SyntheticInputGrant, SyntheticOrigin};

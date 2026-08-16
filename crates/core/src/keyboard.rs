@@ -9,19 +9,99 @@ use std::collections::HashSet;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum PhysicalKey {
-    KeyA, KeyB, KeyC, KeyD, KeyE, KeyF, KeyG, KeyH, KeyI, KeyJ, KeyK, KeyL, KeyM,
-    KeyN, KeyO, KeyP, KeyQ, KeyR, KeyS, KeyT, KeyU, KeyV, KeyW, KeyX, KeyY, KeyZ,
-    Digit0, Digit1, Digit2, Digit3, Digit4, Digit5, Digit6, Digit7, Digit8, Digit9,
-    Enter, Escape, Backspace, Tab, Space,
-    Minus, Equal, BracketLeft, BracketRight, Backslash, Semicolon, Quote, Grave,
-    Comma, Period, Slash,
-    CapsLock, ScrollLock, NumLock,
-    F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
-    PrintScreen, Pause, Insert, Home, PageUp, Delete, End, PageDown,
-    ArrowRight, ArrowLeft, ArrowDown, ArrowUp,
-    ControlLeft, ShiftLeft, AltLeft, SuperLeft,
-    ControlRight, ShiftRight, AltRight, SuperRight,
-    MediaPlayPause, MediaNextTrack, MediaPrevTrack, MediaVolumeUp, MediaVolumeDown, MediaMute,
+    KeyA,
+    KeyB,
+    KeyC,
+    KeyD,
+    KeyE,
+    KeyF,
+    KeyG,
+    KeyH,
+    KeyI,
+    KeyJ,
+    KeyK,
+    KeyL,
+    KeyM,
+    KeyN,
+    KeyO,
+    KeyP,
+    KeyQ,
+    KeyR,
+    KeyS,
+    KeyT,
+    KeyU,
+    KeyV,
+    KeyW,
+    KeyX,
+    KeyY,
+    KeyZ,
+    Digit0,
+    Digit1,
+    Digit2,
+    Digit3,
+    Digit4,
+    Digit5,
+    Digit6,
+    Digit7,
+    Digit8,
+    Digit9,
+    Enter,
+    Escape,
+    Backspace,
+    Tab,
+    Space,
+    Minus,
+    Equal,
+    BracketLeft,
+    BracketRight,
+    Backslash,
+    Semicolon,
+    Quote,
+    Grave,
+    Comma,
+    Period,
+    Slash,
+    CapsLock,
+    ScrollLock,
+    NumLock,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    F11,
+    F12,
+    PrintScreen,
+    Pause,
+    Insert,
+    Home,
+    PageUp,
+    Delete,
+    End,
+    PageDown,
+    ArrowRight,
+    ArrowLeft,
+    ArrowDown,
+    ArrowUp,
+    ControlLeft,
+    ShiftLeft,
+    AltLeft,
+    SuperLeft,
+    ControlRight,
+    ShiftRight,
+    AltRight,
+    SuperRight,
+    MediaPlayPause,
+    MediaNextTrack,
+    MediaPrevTrack,
+    MediaVolumeUp,
+    MediaVolumeDown,
+    MediaMute,
     Compose,
     /// Escape hatch for layout-specific or vendor keys not enumerated above. Carries
     /// the backend's raw code purely for diagnostics (section 28) — never matched on
@@ -282,9 +362,13 @@ impl KeyboardState {
             PhysicalKey::AltLeft | PhysicalKey::AltRight => self.modifiers.alt = is_down,
             PhysicalKey::ShiftLeft | PhysicalKey::ShiftRight => self.modifiers.shift = is_down,
             PhysicalKey::SuperLeft | PhysicalKey::SuperRight => self.modifiers.logo = is_down,
-            PhysicalKey::CapsLock if is_down => self.modifiers.caps_lock = !self.modifiers.caps_lock,
+            PhysicalKey::CapsLock if is_down => {
+                self.modifiers.caps_lock = !self.modifiers.caps_lock
+            }
             PhysicalKey::NumLock if is_down => self.modifiers.num_lock = !self.modifiers.num_lock,
-            PhysicalKey::ScrollLock if is_down => self.modifiers.scroll_lock = !self.modifiers.scroll_lock,
+            PhysicalKey::ScrollLock if is_down => {
+                self.modifiers.scroll_lock = !self.modifiers.scroll_lock
+            }
             _ => {}
         }
     }
@@ -313,17 +397,19 @@ impl KeyboardStateTable {
     /// still register as a Ctrl-click. [`InputService`](crate::service::InputService)
     /// ORs every connected keyboard's modifiers together for non-keyboard events.
     pub fn aggregate(&self) -> Modifiers {
-        self.0.values().fold(Modifiers::default(), |mut acc, state| {
-            let m = state.modifiers();
-            acc.ctrl |= m.ctrl;
-            acc.alt |= m.alt;
-            acc.shift |= m.shift;
-            acc.logo |= m.logo;
-            acc.caps_lock |= m.caps_lock;
-            acc.num_lock |= m.num_lock;
-            acc.scroll_lock |= m.scroll_lock;
-            acc
-        })
+        self.0
+            .values()
+            .fold(Modifiers::default(), |mut acc, state| {
+                let m = state.modifiers();
+                acc.ctrl |= m.ctrl;
+                acc.alt |= m.alt;
+                acc.shift |= m.shift;
+                acc.logo |= m.logo;
+                acc.caps_lock |= m.caps_lock;
+                acc.num_lock |= m.num_lock;
+                acc.scroll_lock |= m.scroll_lock;
+                acc
+            })
     }
 }
 
@@ -367,10 +453,19 @@ mod tests {
         let layout = UsQwertyLayout;
         let logical = layout.map(PhysicalKey::KeyA, Modifiers::default());
         assert_eq!(logical, LogicalKey::Character('a'));
-        assert_eq!(layout.text_for(logical, Modifiers::default()), Some("a".to_string()));
+        assert_eq!(
+            layout.text_for(logical, Modifiers::default()),
+            Some("a".to_string())
+        );
 
-        let shifted = Modifiers { shift: true, ..Default::default() };
-        assert_eq!(layout.map(PhysicalKey::KeyA, shifted), LogicalKey::Character('A'));
+        let shifted = Modifiers {
+            shift: true,
+            ..Default::default()
+        };
+        assert_eq!(
+            layout.map(PhysicalKey::KeyA, shifted),
+            LogicalKey::Character('A')
+        );
 
         // A non-character physical key must not fabricate text.
         let arrow = layout.map(PhysicalKey::ArrowLeft, Modifiers::default());

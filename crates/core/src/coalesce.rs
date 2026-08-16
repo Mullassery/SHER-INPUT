@@ -12,8 +12,12 @@ enum CoalesceKey {
 fn coalesce_key(event: &InputEvent) -> Option<CoalesceKey> {
     match &event.payload {
         InputEventPayload::Pointer(PointerEvent::MotionRelative { .. })
-        | InputEventPayload::Pointer(PointerEvent::MotionAbsolute { .. }) => Some(CoalesceKey::Motion),
-        InputEventPayload::Pointer(PointerEvent::Scroll { axis, .. }) => Some(CoalesceKey::Scroll(*axis)),
+        | InputEventPayload::Pointer(PointerEvent::MotionAbsolute { .. }) => {
+            Some(CoalesceKey::Motion)
+        }
+        InputEventPayload::Pointer(PointerEvent::Scroll { axis, .. }) => {
+            Some(CoalesceKey::Scroll(*axis))
+        }
         _ => None,
     }
 }
@@ -125,14 +129,21 @@ mod tests {
     }
 
     fn motion(device_id: InputDeviceId, seq: u64, dx: f64, dy: f64) -> InputEvent {
-        base(device_id, seq, InputEventPayload::Pointer(PointerEvent::MotionRelative { dx, dy }))
+        base(
+            device_id,
+            seq,
+            InputEventPayload::Pointer(PointerEvent::MotionRelative { dx, dy }),
+        )
     }
 
     fn button(device_id: InputDeviceId, seq: u64, pressed: bool) -> InputEvent {
         base(
             device_id,
             seq,
-            InputEventPayload::Pointer(PointerEvent::Button { button: PointerButton::Left, pressed }),
+            InputEventPayload::Pointer(PointerEvent::Button {
+                button: PointerButton::Left,
+                pressed,
+            }),
         )
     }
 
@@ -202,7 +213,10 @@ mod tests {
             delivered[0].payload,
             InputEventPayload::Pointer(PointerEvent::MotionRelative { .. })
         ));
-        assert!(matches!(delivered[1].payload, InputEventPayload::Pointer(PointerEvent::Button { .. })));
+        assert!(matches!(
+            delivered[1].payload,
+            InputEventPayload::Pointer(PointerEvent::Button { .. })
+        ));
     }
 
     #[test]

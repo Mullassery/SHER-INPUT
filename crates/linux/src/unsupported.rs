@@ -24,7 +24,11 @@ impl InputBackend for LinuxBackend {
         "sher_input_linux::LinuxBackend (unsupported on this platform)"
     }
 
-    fn spawn(self: Box<Self>, _sink: BackendEventSink, _running: Arc<AtomicBool>) -> Result<std::thread::JoinHandle<()>> {
+    fn spawn(
+        self: Box<Self>,
+        _sink: BackendEventSink,
+        _running: Arc<AtomicBool>,
+    ) -> Result<std::thread::JoinHandle<()>> {
         Err(Error::Unsupported(
             "sher_input_linux requires Linux/evdev; use sher_input_test::ScriptedBackend for development on this platform"
                 .to_string(),

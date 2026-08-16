@@ -5,7 +5,9 @@ use crate::config::InputConfig;
 use crate::error::{Error, Result};
 use crate::event::{InputEvent, InputEventPayload};
 use crate::ids::{InputDeviceId, SequenceCounter, Timestamp};
-use crate::keyboard::{KeyAction, KeyboardEvent, KeyboardLayout, KeyboardStateTable, Modifiers, UsQwertyLayout};
+use crate::keyboard::{
+    KeyAction, KeyboardEvent, KeyboardLayout, KeyboardStateTable, Modifiers, UsQwertyLayout,
+};
 use crate::pointer::{PointerEvent, PointerStateTable};
 use crate::registry::DeviceRegistry;
 use crate::source::{InputSource, SyntheticInputGrant};
@@ -178,7 +180,11 @@ impl InputService {
     /// (section 14) — call once per compositor frame so coalescing never adds more
     /// than one frame of latency.
     pub fn flush_coalesced(&self) {
-        let ready = self.coalescer.lock().expect("coalescer lock poisoned").drain_all();
+        let ready = self
+            .coalescer
+            .lock()
+            .expect("coalescer lock poisoned")
+            .drain_all();
         for event in ready {
             let _ = self.events_tx.send(event);
         }
@@ -196,19 +202,45 @@ impl InputService {
                     tracing::warn!("{err}");
                     return;
                 }
-                self.emit(device_id, source, Modifiers::default(), InputEventPayload::DeviceAdded(device));
+                self.emit(
+                    device_id,
+                    source,
+                    Modifiers::default(),
+                    InputEventPayload::DeviceAdded(device),
+                );
             }
             BackendEvent::DeviceRemoved(device_id) => {
                 if self.registry.remove(device_id).is_err() {
                     tracing::warn!("device removed but was not registered: {device_id}");
                 }
-                self.keyboard_state.lock().expect("keyboard lock poisoned").remove(device_id);
-                self.pointer_state.lock().expect("pointer lock poisoned").remove(device_id);
-                self.touch_state.lock().expect("touch lock poisoned").remove(device_id);
-                self.coalescer.lock().expect("coalescer lock poisoned").drain_device(device_id);
-                self.emit(device_id, source, Modifiers::default(), InputEventPayload::DeviceRemoved(device_id));
+                self.keyboard_state
+                    .lock()
+                    .expect("keyboard lock poisoned")
+                    .remove(device_id);
+                self.pointer_state
+                    .lock()
+                    .expect("pointer lock poisoned")
+                    .remove(device_id);
+                self.touch_state
+                    .lock()
+                    .expect("touch lock poisoned")
+                    .remove(device_id);
+                self.coalescer
+                    .lock()
+                    .expect("coalescer lock poisoned")
+                    .drain_device(device_id);
+                self.emit(
+                    device_id,
+                    source,
+                    Modifiers::default(),
+                    InputEventPayload::DeviceRemoved(device_id),
+                );
             }
-            BackendEvent::Key { device_id, physical_key, pressed } => {
+            BackendEvent::Key {
+                device_id,
+                physical_key,
+                pressed,
+            } => {
                 let (modifiers, is_repeat) = {
                     let mut table = self.keyboard_state.lock().expect("keyboard lock poisoned");
                     let state = table.state_mut(device_id);
@@ -223,7 +255,11 @@ impl InputService {
                 let (logical, text) = {
                     let layout = self.layout.read().expect("layout lock poisoned");
                     let logical = layout.map(physical_key, modifiers);
-                    let text = if pressed { layout.text_for(logical, modifiers) } else { None };
+                    let text = if pressed {
+                        layout.text_for(logical, modifiers)
+                    } else {
+                        None
+                    };
                     (logical, text)
                 };
                 let action = if !pressed {
@@ -248,9 +284,17 @@ impl InputService {
                     .state_mut(device_id)
                     .apply_relative(dx, dy);
                 let modifiers = self.aggregate_modifiers();
-                self.emit(device_id, source, modifiers, InputEventPayload::Pointer(PointerEvent::MotionRelative { dx, dy }));
+                self.emit(
+                    device_id,
+                    source,
+                    modifiers,
+                    InputEventPayload::Pointer(PointerEvent::MotionRelative { dx, dy }),
+                );
             }
-            BackendEvent::MotionAbsolute { device_id, position } => {
+            BackendEvent::MotionAbsolute {
+                device_id,
+                position,
+            } => {
                 self.pointer_state
                     .lock()
                     .expect("pointer lock poisoned")
@@ -264,22 +308,40 @@ impl InputService {
                     InputEventPayload::Pointer(PointerEvent::MotionAbsolute { position }),
                 );
             }
-            BackendEvent::PointerButton { device_id, button, pressed } => {
+            BackendEvent::PointerButton {
+                device_id,
+                button,
+                pressed,
+            } => {
                 self.pointer_state
                     .lock()
                     .expect("pointer lock poisoned")
                     .state_mut(device_id)
                     .note_button(button, pressed);
                 let modifiers = self.aggregate_modifiers();
-                self.emit(device_id, source, modifiers, InputEventPayload::Pointer(PointerEvent::Button { button, pressed }));
+                self.emit(
+                    device_id,
+                    source,
+                    modifiers,
+                    InputEventPayload::Pointer(PointerEvent::Button { button, pressed }),
+                );
             }
-            BackendEvent::Scroll { device_id, axis, delta, high_resolution } => {
+            BackendEvent::Scroll {
+                device_id,
+                axis,
+                delta,
+                high_resolution,
+            } => {
                 let modifiers = self.aggregate_modifiers();
                 self.emit(
                     device_id,
                     source,
                     modifiers,
-                    InputEventPayload::Pointer(PointerEvent::Scroll { axis, delta, high_resolution }),
+                    InputEventPayload::Pointer(PointerEvent::Scroll {
+                        axis,
+                        delta,
+                        high_resolution,
+                    }),
                 );
             }
             BackendEvent::Touch { device_id, event } => {
@@ -289,23 +351,47 @@ impl InputService {
                     .state_mut(device_id)
                     .apply(&event);
                 let modifiers = self.aggregate_modifiers();
-                self.emit(device_id, source, modifiers, InputEventPayload::Touch(event));
+                self.emit(
+                    device_id,
+                    source,
+                    modifiers,
+                    InputEventPayload::Touch(event),
+                );
             }
             BackendEvent::Tablet { device_id, event } => {
                 let modifiers = self.aggregate_modifiers();
-                self.emit(device_id, source, modifiers, InputEventPayload::Tablet(event));
+                self.emit(
+                    device_id,
+                    source,
+                    modifiers,
+                    InputEventPayload::Tablet(event),
+                );
             }
             BackendEvent::Gamepad { device_id, event } => {
-                self.emit(device_id, source, Modifiers::default(), InputEventPayload::Gamepad(event));
+                self.emit(
+                    device_id,
+                    source,
+                    Modifiers::default(),
+                    InputEventPayload::Gamepad(event),
+                );
             }
         }
     }
 
     fn aggregate_modifiers(&self) -> Modifiers {
-        self.keyboard_state.lock().expect("keyboard lock poisoned").aggregate()
+        self.keyboard_state
+            .lock()
+            .expect("keyboard lock poisoned")
+            .aggregate()
     }
 
-    fn emit(&self, device_id: InputDeviceId, source: InputSource, modifiers: Modifiers, payload: InputEventPayload) {
+    fn emit(
+        &self,
+        device_id: InputDeviceId,
+        source: InputSource,
+        modifiers: Modifiers,
+        payload: InputEventPayload,
+    ) {
         let event = InputEvent {
             timestamp: Timestamp::now(),
             sequence: self.sequence.next(),
@@ -314,7 +400,11 @@ impl InputService {
             modifiers,
             payload,
         };
-        let ready = self.coalescer.lock().expect("coalescer lock poisoned").offer(event);
+        let ready = self
+            .coalescer
+            .lock()
+            .expect("coalescer lock poisoned")
+            .offer(event);
         for event in ready {
             // No subscribers is a normal state (e.g. before SHER-Display attaches);
             // broadcast::Sender::send only errors when there are zero receivers.

@@ -22,7 +22,11 @@ impl InputBackend for ScriptedBackend {
         "sher_input_test::ScriptedBackend"
     }
 
-    fn spawn(self: Box<Self>, sink: BackendEventSink, running: Arc<AtomicBool>) -> Result<std::thread::JoinHandle<()>> {
+    fn spawn(
+        self: Box<Self>,
+        sink: BackendEventSink,
+        running: Arc<AtomicBool>,
+    ) -> Result<std::thread::JoinHandle<()>> {
         let script = self.script;
         std::thread::Builder::new()
             .name("sher-input-scripted-backend".to_string())

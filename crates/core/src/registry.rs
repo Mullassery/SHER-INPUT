@@ -36,11 +36,20 @@ impl DeviceRegistry {
     }
 
     pub fn get(&self, id: InputDeviceId) -> Option<InputDevice> {
-        self.devices.read().expect("registry lock poisoned").get(&id).cloned()
+        self.devices
+            .read()
+            .expect("registry lock poisoned")
+            .get(&id)
+            .cloned()
     }
 
     pub fn list(&self) -> Vec<InputDevice> {
-        self.devices.read().expect("registry lock poisoned").values().cloned().collect()
+        self.devices
+            .read()
+            .expect("registry lock poisoned")
+            .values()
+            .cloned()
+            .collect()
     }
 
     pub fn connected(&self) -> Vec<InputDevice> {
@@ -100,14 +109,20 @@ mod tests {
         let dup = d.clone();
         registry.add(d).unwrap();
 
-        assert!(matches!(registry.add(dup), Err(Error::DeviceAlreadyRegistered(_))));
+        assert!(matches!(
+            registry.add(dup),
+            Err(Error::DeviceAlreadyRegistered(_))
+        ));
         assert_eq!(registry.len(), 1);
     }
 
     #[test]
     fn removing_unknown_device_errors() {
         let registry = DeviceRegistry::new();
-        assert!(matches!(registry.remove(InputDeviceId::new()), Err(Error::DeviceNotFound(_))));
+        assert!(matches!(
+            registry.remove(InputDeviceId::new()),
+            Err(Error::DeviceNotFound(_))
+        ));
     }
 
     #[test]

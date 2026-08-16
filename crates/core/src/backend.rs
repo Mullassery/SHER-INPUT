@@ -125,5 +125,9 @@ pub trait InputBackend: Send + 'static {
     /// simulated event generator, ...) and starts reporting [`BackendEvent`]s to
     /// `sink`. The backend must observe `running` and exit promptly when it flips to
     /// `false`.
-    fn spawn(self: Box<Self>, sink: BackendEventSink, running: Arc<AtomicBool>) -> Result<std::thread::JoinHandle<()>>;
+    fn spawn(
+        self: Box<Self>,
+        sink: BackendEventSink,
+        running: Arc<AtomicBool>,
+    ) -> Result<std::thread::JoinHandle<()>>;
 }

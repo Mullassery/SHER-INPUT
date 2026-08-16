@@ -5,8 +5,8 @@
 //! where it becomes visible without reaching into backend internals.
 
 use sher_input_core::{
-    BackendEvent, InputConfig, InputDeviceId, InputEvent, InputEventPayload, InputService, KeyAction, PhysicalKey,
-    PointerButton, PointerEvent, Timestamp, TouchPhase,
+    BackendEvent, InputConfig, InputDeviceId, InputEvent, InputEventPayload, InputService,
+    KeyAction, PhysicalKey, PointerButton, PointerEvent, Timestamp, TouchPhase,
 };
 use sher_input_test::{keyboard_device, mouse_device, ScriptedBackend};
 use std::time::Duration;
@@ -14,7 +14,9 @@ use tokio::sync::broadcast;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt().with_env_filter(tracing_subscriber::EnvFilter::from_default_env()).init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
 
     let simulate = std::env::args().any(|a| a == "--simulate") || cfg!(not(target_os = "linux"));
 
@@ -100,13 +102,27 @@ fn print_event(count: u64, event: &InputEvent) {
                 println!("#{count:<6} [{src}] motion-rel     {dev}  dx={dx:.1} dy={dy:.1}  (+{latency}us)")
             }
             PointerEvent::MotionAbsolute { position } => {
-                println!("#{count:<6} [{src}] motion-abs     {dev}  x={:.1} y={:.1}  (+{latency}us)", position.x, position.y)
+                println!(
+                    "#{count:<6} [{src}] motion-abs     {dev}  x={:.1} y={:.1}  (+{latency}us)",
+                    position.x, position.y
+                )
             }
             PointerEvent::Button { button, pressed } => {
-                let label = if *pressed { "button-down" } else { "button-up  " };
-                println!("#{count:<6} [{src}] {label}    {dev}  {}", fmt_button(*button))
+                let label = if *pressed {
+                    "button-down"
+                } else {
+                    "button-up  "
+                };
+                println!(
+                    "#{count:<6} [{src}] {label}    {dev}  {}",
+                    fmt_button(*button)
+                )
             }
-            PointerEvent::Scroll { axis, delta, high_resolution } => {
+            PointerEvent::Scroll {
+                axis,
+                delta,
+                high_resolution,
+            } => {
                 println!("#{count:<6} [{src}] scroll         {dev}  axis={axis:?} delta={delta:.2} hi_res={high_resolution}")
             }
             PointerEvent::Enter => println!("#{count:<6} [{src}] pointer-enter  {dev}"),
@@ -124,8 +140,12 @@ fn print_event(count: u64, event: &InputEvent) {
                 t.contact_id.0, t.position.x, t.position.y
             );
         }
-        InputEventPayload::Tablet(_) => println!("#{count:<6} [{src}] tablet         {dev}  (Phase 4)"),
-        InputEventPayload::Gamepad(_) => println!("#{count:<6} [{src}] gamepad        {dev}  (Phase 4)"),
+        InputEventPayload::Tablet(_) => {
+            println!("#{count:<6} [{src}] tablet         {dev}  (Phase 4)")
+        }
+        InputEventPayload::Gamepad(_) => {
+            println!("#{count:<6} [{src}] gamepad        {dev}  (Phase 4)")
+        }
     }
 }
 
@@ -161,7 +181,10 @@ fn short_id(id: InputDeviceId) -> String {
 }
 
 fn latency_since(timestamp: Timestamp) -> u64 {
-    Timestamp::now().as_nanos().saturating_sub(timestamp.as_nanos()) / 1_000
+    Timestamp::now()
+        .as_nanos()
+        .saturating_sub(timestamp.as_nanos())
+        / 1_000
 }
 
 fn demo_script() -> Vec<(Duration, BackendEvent)> {
@@ -171,23 +194,55 @@ fn demo_script() -> Vec<(Duration, BackendEvent)> {
     let mouse_id = mouse.id;
 
     let mut script = vec![
-        (Duration::from_millis(200), BackendEvent::DeviceAdded(keyboard)),
+        (
+            Duration::from_millis(200),
+            BackendEvent::DeviceAdded(keyboard),
+        ),
         (Duration::from_millis(200), BackendEvent::DeviceAdded(mouse)),
     ];
 
     for key in [PhysicalKey::KeyH, PhysicalKey::KeyI] {
-        script.push((Duration::from_millis(400), BackendEvent::Key { device_id: kb_id, physical_key: key, pressed: true }));
-        script.push((Duration::from_millis(80), BackendEvent::Key { device_id: kb_id, physical_key: key, pressed: false }));
+        script.push((
+            Duration::from_millis(400),
+            BackendEvent::Key {
+                device_id: kb_id,
+                physical_key: key,
+                pressed: true,
+            },
+        ));
+        script.push((
+            Duration::from_millis(80),
+            BackendEvent::Key {
+                device_id: kb_id,
+                physical_key: key,
+                pressed: false,
+            },
+        ));
     }
 
-    script.push((Duration::from_millis(600), BackendEvent::MotionRelative { device_id: mouse_id, dx: 12.0, dy: -4.0 }));
+    script.push((
+        Duration::from_millis(600),
+        BackendEvent::MotionRelative {
+            device_id: mouse_id,
+            dx: 12.0,
+            dy: -4.0,
+        },
+    ));
     script.push((
         Duration::from_millis(150),
-        BackendEvent::PointerButton { device_id: mouse_id, button: PointerButton::Left, pressed: true },
+        BackendEvent::PointerButton {
+            device_id: mouse_id,
+            button: PointerButton::Left,
+            pressed: true,
+        },
     ));
     script.push((
         Duration::from_millis(80),
-        BackendEvent::PointerButton { device_id: mouse_id, button: PointerButton::Left, pressed: false },
+        BackendEvent::PointerButton {
+            device_id: mouse_id,
+            button: PointerButton::Left,
+            pressed: false,
+        },
     ));
 
     script

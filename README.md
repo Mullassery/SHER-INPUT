@@ -162,4 +162,5 @@ added when a concrete need exists — not speculatively.
 
 ## License
 
-See [`LICENSE`](LICENSE).
+Free to use with attribution to Georgi Mammen Mullassery and the SHER project — not
+an OSI-approved open-source license. See [`LICENSE`](LICENSE) for the full terms.

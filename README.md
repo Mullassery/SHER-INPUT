@@ -160,6 +160,21 @@ not by reaching into SHER-Display's own crate. A real dependency on SHER-Kernel 
 for device handles from a future native backend) is expected eventually, but only gets
 added when a concrete need exists — not speculatively.
 
+### Cross-repo compatibility (verified, whole family)
+
+This repo is one of 5 sibling repos under the Mullassery org: `SHER-Kernel`,
+`SHER-Graphics`, `SHER-Display`, `SHER-Input` (this repo), and `Aurora`
+(GitHub: `SHER-Aurora`). Of those, only `SHER-Display` actually depends on
+this repo — via relative path (`../SHER-Input/crates/core`,
+`../SHER-Input/crates/test-support`), consuming `sher_input_core` and
+`sher_input_test`. Verified current: a from-scratch `cargo build
+--workspace` in SHER-Display against this repo's present state compiles
+clean, and `cargo test --workspace` there passes 56/56 — including
+`sher_display_input`, which genuinely drives this repo's real
+`sher_input_core::InputService` rather than a local reimplementation.
+`SHER-Kernel`, `SHER-Graphics`, and `Aurora` have no Cargo-level dependency
+on this repo in either direction.
+
 ## License
 
 Free to use with attribution to Georgi Mammen Mullassery and the SHER project — not

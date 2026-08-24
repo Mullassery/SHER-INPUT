@@ -153,3 +153,22 @@ lifetime independently.
   500ms for topology changes (per-device reads are still a blocking, event-driven
   read per device; only *topology* discovery is polled). Swapping this for an
   `inotify`-based watch is a natural Phase 2 follow-up, not a redesign.
+- Driver-level sandboxing and hot-restart (external critique, verified real gap):
+  `LinuxBackend::spawn` just spawns plain OS threads in-process (no seccomp/namespace/
+  subprocess isolation), and while a panicking backend thread doesn't take
+  `InputService` down (Rust per-thread unwind + `BackendHandle` scoping — see
+  "Failure handling" above), there's no hot-restart: `supervise()` only polls for
+  *new* devices every 500ms, it never retries a device whose reader thread already
+  died. A dead device today stays dead until re-plugged.
+- Fuzzing at the SHER-Input/evdev boundary (external critique, verified real gap):
+  no cargo-fuzz/proptest setup exists anywhere. Raw byte parsing of `/dev/input`
+  happens inside the external `evdev` crate, not in SHER-Input's own code, so a
+  fuzz target should feed malformed `evdev::InputEvent` streams into
+  `translate_batch`/`keymap::map_key` rather than parsing raw bytes directly.
+- Note: the "unified focus-management/gesture-routing pipeline into Aurora's event
+  loop" critique item does NOT apply — focus/window-routing is deliberately
+  SHER-Display's job, not SHER-Input's (see "Architectural boundary" in README.md).
+  The canonical ordered event stream + capture contract SHER-Input already provides
+  is the correct scope; latency guarantees exist only for coalescing (8ms flush
+  ticker), not end-to-end delivery, which is a narrower, legitimate follow-up if
+  ever needed.

@@ -100,6 +100,31 @@ impl BackendHandle {
         self.stop_inner();
     }
 
+    /// Non-blocking liveness check: `true` once the backend's IO thread has exited,
+    /// whether from a clean [`stop`](Self::stop)/drop or a panic. Unlike joining, this
+    /// never blocks and doesn't consume the handle, so a caller can poll it on a timer
+    /// to notice a crashed backend and decide to hot-restart it (a fresh
+    /// [`InputBackend`] instance through [`InputService::start_backend`]
+    /// (crate::service::InputService::start_backend)) without taking `InputService`
+    /// itself down — section 27's crash-isolation claim, made pollable rather than
+    /// just structurally true.
+    pub fn is_finished(&self) -> bool {
+        self.thread.as_ref().is_none_or(|t| t.is_finished())
+    }
+
+    /// Stops the backend (a no-op if its thread had already exited) and reports
+    /// whether that exit was a panic rather than a clean return — the distinction a
+    /// hot-restart policy needs (restart on crash, don't treat an intentional `stop()`
+    /// as one). Consumes the handle because `JoinHandle::join`, the only way `std`
+    /// exposes this, does too.
+    pub fn stop_and_check_panicked(mut self) -> bool {
+        self.running.store(false, Ordering::SeqCst);
+        self.thread
+            .take()
+            .map(|t| t.join().is_err())
+            .unwrap_or(false)
+    }
+
     fn stop_inner(&mut self) {
         self.running.store(false, Ordering::SeqCst);
         if let Some(thread) = self.thread.take() {
@@ -130,4 +155,53 @@ pub trait InputBackend: Send + 'static {
         sink: BackendEventSink,
         running: Arc<AtomicBool>,
     ) -> Result<std::thread::JoinHandle<()>>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{Duration, Instant};
+
+    fn wait_until_finished(handle: &BackendHandle, timeout: Duration) {
+        let deadline = Instant::now() + timeout;
+        while !handle.is_finished() {
+            assert!(Instant::now() < deadline, "did not finish in time");
+            std::thread::sleep(Duration::from_millis(5));
+        }
+    }
+
+    #[test]
+    fn is_finished_is_false_while_the_thread_is_alive() {
+        let running = Arc::new(AtomicBool::new(true));
+        let running_for_thread = Arc::clone(&running);
+        let thread = std::thread::spawn(move || {
+            while running_for_thread.load(Ordering::SeqCst) {
+                std::thread::sleep(Duration::from_millis(5));
+            }
+        });
+        let handle = BackendHandle::new(running, thread);
+
+        assert!(!handle.is_finished());
+        assert!(!handle.stop_and_check_panicked());
+    }
+
+    #[test]
+    fn stop_and_check_panicked_is_false_for_a_clean_exit() {
+        let running = Arc::new(AtomicBool::new(true));
+        let thread = std::thread::spawn(|| {});
+        let handle = BackendHandle::new(running, thread);
+
+        wait_until_finished(&handle, Duration::from_secs(2));
+        assert!(!handle.stop_and_check_panicked());
+    }
+
+    #[test]
+    fn stop_and_check_panicked_is_true_after_a_panic() {
+        let running = Arc::new(AtomicBool::new(true));
+        let thread = std::thread::spawn(|| panic!("boom"));
+        let handle = BackendHandle::new(running, thread);
+
+        wait_until_finished(&handle, Duration::from_secs(2));
+        assert!(handle.stop_and_check_panicked());
+    }
 }

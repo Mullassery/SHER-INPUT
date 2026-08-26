@@ -51,7 +51,21 @@ aspirationally:
   lock) and a synthetic-input model (accessibility tools, automated testing, remote
   desktop, AI agents) where every grant is scoped to one origin and one event kind —
   there is no unrestricted grant.
-- 42 tests: 30 platform-independent (unit tests for state tracking/coalescing, plus
+- Detectable, hot-restartable backend crashes (external critique, verified real gap
+  — was previously an unverified design claim, not fixed code): `ARCHITECTURE.md`
+  section 27 already asserted "a backend thread panicking ... does not take
+  `InputService` down," true by construction (`InputBackend::spawn` runs on a real
+  `std::thread`, which Rust itself contains a panic within), but nothing let a caller
+  find out a backend had crashed, and there was no restart path. `BackendHandle`
+  gained `is_finished()` (non-blocking liveness poll) and
+  `stop_and_check_panicked()` (distinguishes a crash from a clean stop); a caller
+  detects a dead backend and calls `InputService::start_backend` again with a fresh
+  instance to hot-restart it — proved end to end with a backend that panics on
+  purpose, an assertion that `InputService` keeps delivering events from other
+  sources afterward, and a fresh backend instance resuming real event delivery on
+  the same service (`crates/core/tests/backend_crash_recovery.rs`, plus
+  `backend.rs`'s own unit tests for the panic/clean-stop distinction).
+- 48 tests: 36 platform-independent (unit tests for state tracking/coalescing, plus
   integration tests that drive a simulated backend through the real `InputService`
   pipeline into a mock display-style router, proving the focus/capture boundary end to
   end) plus 12 that only compile and run on Linux — real synthetic `evdev` events

@@ -131,7 +131,17 @@ A backend read error or a device disappearing is reported as `DeviceRemoved`, no
 crash — `InputService::ingest` clears that device's keyboard/pointer/touch state and
 any coalesced-but-undelivered samples for it, then moves on. A backend thread panicking
 or hanging does not take `InputService` down; `BackendHandle` scopes a backend's
-lifetime independently.
+lifetime independently — verified with a backend that panics on purpose
+(`crates/core/tests/backend_crash_recovery.rs`), not just asserted here.
+
+Detecting the crash and restarting are separate concerns from *surviving* it:
+`BackendHandle::is_finished()` lets a caller poll (without blocking) whether a
+backend's thread has exited, and `stop_and_check_panicked()` reports whether that
+exit was a panic rather than a clean `stop()`. A caller's restart policy (not part
+of this crate — `InputService::start_backend` doesn't retain the handles it hands
+out) polls, and on a crash, calls `start_backend` again with a fresh backend
+instance — the same test proves this resumes real event delivery on the same
+`InputService`.
 
 ## Phased scope
 

@@ -33,6 +33,19 @@ Full design rationale — layering, the canonical event model, ordering and coal
 guarantees, the capture and synthetic-input contracts — lives in
 [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
+## Use cases
+
+- **Building an input pipeline with a real capture/synthetic-input
+  security model** — every grant scoped to one origin and one event kind,
+  not an unrestricted hook into `/dev/input`.
+- **Testing input-dependent code without real hardware** —
+  `sher-input-monitor --simulate` and `sher_input_test::SimulatedController`
+  drive the real pipeline deterministically.
+- **Not yet a good fit for:** touch, tablet, or gamepad input (types
+  exist, no backend yet — deliberate Phase 4 deferral); anything needing
+  low-latency hotplug detection (currently polls `/dev/input` every 500ms,
+  not `inotify`-based).
+
 ## What's actually implemented
 
 This is Phase 1 of a five-phase plan, and the repository says so honestly rather than

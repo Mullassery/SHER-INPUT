@@ -14,7 +14,7 @@ tracing = { workspace = true }
 # Linux-only: on any other host (this workspace is developed on macOS) these are not
 # even fetched, and the crate falls back to the `Unsupported` stub in src/unsupported.rs.
 [target.'cfg(target_os = "linux")'.dependencies]
-evdev = "0.12"
+evdev = "0.13"
 
 # Only needed to build a `BackendEventSink` in `reader`'s unit tests, which construct
 # synthetic evdev events and assert on what gets sent — no tokio runtime is started,

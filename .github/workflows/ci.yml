@@ -42,3 +42,24 @@ jobs:
 
       - name: cargo fmt --check
         run: cargo fmt --check
+
+  audit:
+    name: cargo audit
+    runs-on: ubuntu-latest
+    # This job is allowed to fail the workflow — a real advisory hit or a
+    # transient advisory-database fetch failure both surface as a red X here
+    # on purpose. Do not add continue-on-error/|| true to silence it; if it
+    # fails, either fix the dependency or investigate the fetch failure.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      - name: cargo audit
+        run: cargo audit

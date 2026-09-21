@@ -125,6 +125,51 @@ state tracking, sequencing, coalescing. `sher_input_linux::LinuxBackend` and
 from `InputService`'s point of view, which is the whole point: a future SHER-Kernel-
 native backend is a third implementation, not a rewrite.
 
+## Crate split and how SHER-Display consumes it
+
+Three crates in this repo, each isolating something real — not one per
+device class, and not a speculative plugin system:
+
+```mermaid
+flowchart TB
+    subgraph "SHER-Input (this repo)"
+        core["sher_input_core<br/>canonical types · InputService<br/>CaptureRegistry · coalescer"]
+        linux["sher_input_linux<br/>real evdev backend<br/>(Linux only; stub elsewhere)"]
+        test["sher_input_test<br/>ScriptedBackend ·<br/>SimulatedController"]
+        monitor["sher-input-monitor<br/>diagnostic CLI"]
+
+        linux -- "implements InputBackend" --> core
+        test -- "implements InputBackend" --> core
+        monitor --> core
+        monitor --> linux
+        monitor --> test
+    end
+
+    display["SHER-Display<br/>sher_display_input crate<br/>(sibling repo, path dependency)"]
+    display -- "consumes InputService,<br/>real events on Linux,<br/>SimulatedController in tests" --> core
+    display -. "does NOT depend on" .-> linux
+
+    style core fill:#4a7c8c,color:#fff
+    style linux fill:#8c5a4a,color:#fff
+    style test fill:#5a8c4a,color:#fff
+    style monitor fill:#6a6a6a,color:#fff
+    style display fill:#7c4a8c,color:#fff
+```
+
+`sher_input_linux` and `sher_input_test` both implement the same
+`InputBackend` trait and are interchangeable from `InputService`'s point of
+view — that's the whole point of the trait (see "Backend contract" above).
+SHER-Display only ever depends on `sher_input_core` (for the real,
+production path) and `sher_input_test` (to drive its own tests
+deterministically); it has no reason to depend on `sher_input_linux`
+directly, since it never needs Linux-specific types — only the normalized
+stream `InputService` produces. This repo's own tests prove the
+core↔SHER-Display contract with a hand-written mock router
+(`tests/tests/contract.rs`); the real `sher_display_input` crate lives in
+the sibling `SHER-Display` repo and is not built as part of this workspace
+(see `ROADMAP_HONEST.md` for exactly what has and hasn't been
+cross-verified).
+
 ## Failure handling
 
 A backend read error or a device disappearing is reported as `DeviceRemoved`, not a

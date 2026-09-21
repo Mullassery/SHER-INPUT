@@ -1,0 +1,44 @@
+name: Feature request
+description: Propose new functionality or an API change for SHER-Input
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read `ARCHITECTURE.md`'s "Layering" and "Architectural boundary"
+        sections first. SHER-Input owns device discovery, normalization,
+        state tracking, sequencing, and the capture/synthetic-input
+        contract — it never owns windows, surfaces, focus, or compositing
+        (that's SHER-Display), and it does not depend on SHER-Kernel unless
+        there is a concrete need. A request that crosses either boundary
+        will be redirected, not implemented here.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve
+      description: What can't you do today, and why does it matter?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: API sketch, or which phase in ARCHITECTURE.md's table this belongs to.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Which phase does this belong to (if known)
+      options:
+        - "Phase 1 — Linux backend / core model"
+        - "Phase 2 — SHER-Display integration"
+        - "Phase 3 — Aurora integration"
+        - "Phase 4 — touch/tablet/gamepad backends"
+        - "Phase 5 — synthetic input / security policy"
+        - "Not sure"
+    validations:
+      required: false

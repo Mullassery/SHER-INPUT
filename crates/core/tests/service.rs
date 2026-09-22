@@ -202,3 +202,38 @@ async fn synthetic_input_is_tagged_and_rejected_without_a_grant() {
         sher_input_core::InputSource::Synthetic(SyntheticOrigin::AccessibilityTool)
     ));
 }
+
+#[tokio::test]
+async fn synthetic_device_added_and_removed_are_rejected_because_no_grant_scope_covers_device_management(
+) {
+    let service = InputService::new(InputConfig::default());
+    let id = InputDeviceId::new();
+
+    // Even a grant with every input-kind permission enabled has no way to opt into
+    // adding/removing devices — SyntheticInputGrant deliberately has no field for it
+    // (source.rs: "no SyntheticInputGrant::unrestricted()" / "every grant is scoped to
+    // one origin and one event kind"). A grant scoped to keyboard/pointer/touch must
+    // not be able to spoof hotplug events into the registry as a side effect.
+    let fully_scoped = SyntheticInputGrant::new(SyntheticOrigin::AiAgent)
+        .with_keyboard()
+        .with_pointer()
+        .with_touch();
+
+    let add_result =
+        service.submit_synthetic(&fully_scoped, BackendEvent::DeviceAdded(keyboard(id)));
+    assert!(
+        add_result.is_err(),
+        "no grant scope covers device management; DeviceAdded must be denied"
+    );
+    assert_eq!(
+        service.registry().len(),
+        0,
+        "the spoofed device must not be registered"
+    );
+
+    let remove_result = service.submit_synthetic(&fully_scoped, BackendEvent::DeviceRemoved(id));
+    assert!(
+        remove_result.is_err(),
+        "no grant scope covers device management; DeviceRemoved must be denied"
+    );
+}

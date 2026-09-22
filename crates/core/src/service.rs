@@ -155,6 +155,14 @@ impl InputService {
     /// event kind being submitted, and is always tagged
     /// [`InputSource::Synthetic`] so no consumer can mistake it for a physical key
     /// press — including an AI agent's own view of what it just did.
+    ///
+    /// `DeviceAdded`/`DeviceRemoved` are always denied here: [`SyntheticInputGrant`]
+    /// deliberately has no field scoping device-management (only
+    /// keyboard/pointer/touch, section 24's "every grant is scoped to one origin and
+    /// one event kind"), so a grant fully scoped to e.g. keyboard input must not be
+    /// able to spoof a hotplug event into the registry as a side effect. Real hotplug
+    /// only ever reaches the registry through [`InputService::ingest`] (physical
+    /// backends), never through this synthetic path.
     pub fn submit_synthetic(&self, grant: &SyntheticInputGrant, event: BackendEvent) -> Result<()> {
         let allowed = match &event {
             BackendEvent::Key { .. } => grant.allows_keyboard,
@@ -163,8 +171,10 @@ impl InputService {
             | BackendEvent::PointerButton { .. }
             | BackendEvent::Scroll { .. } => grant.allows_pointer,
             BackendEvent::Touch { .. } => grant.allows_touch,
-            BackendEvent::DeviceAdded(_) | BackendEvent::DeviceRemoved(_) => true,
-            BackendEvent::Tablet { .. } | BackendEvent::Gamepad { .. } => false,
+            BackendEvent::DeviceAdded(_)
+            | BackendEvent::DeviceRemoved(_)
+            | BackendEvent::Tablet { .. }
+            | BackendEvent::Gamepad { .. } => false,
         };
         if !allowed {
             return Err(Error::SyntheticInputDenied(format!(

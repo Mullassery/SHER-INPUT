@@ -11,6 +11,16 @@ commit; see `git log` for the full commit-by-commit history.
 Changes on `main` since the `v0.2.0` tag (`Cargo.toml` is at `0.3.0` but this
 has not been tagged as a release yet):
 
+### Fixed
+- `InputService::submit_synthetic` no longer accepts synthetic
+  `DeviceAdded`/`DeviceRemoved` events regardless of grant scope.
+  `SyntheticInputGrant` has no field for device management (only
+  keyboard/pointer/touch), so a grant scoped to e.g. keyboard-only input
+  could previously still spoof a device into (or out of) the registry via
+  the synthetic-input path — contradicting the documented "no
+  `SyntheticInputGrant::unrestricted()`" invariant. Physical hotplug is
+  unaffected. See `ROADMAP_HONEST.md` item 9.
+
 ### Added
 - `BackendHandle::is_finished()` (non-blocking liveness poll) and
   `stop_and_check_panicked()` (distinguishes a backend crash from a clean

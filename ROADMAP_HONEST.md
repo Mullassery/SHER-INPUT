@@ -118,3 +118,28 @@ Per the scope of this pass (documentation/disclosure-first), none of the
 above eight items were fixed — they need dedicated follow-up work, not a
 drive-by patch, and are recorded here specifically so a future session can
 pick one and scope it properly.
+
+## Fixed in a later quick-fix pass (2026-09-22)
+
+9. ~~**`submit_synthetic` let any grant add/remove devices, regardless of
+   scope.**~~ **Fixed.** `crates/core/src/service.rs`'s `submit_synthetic`
+   (previously line 166) matched `BackendEvent::DeviceAdded(_) |
+   BackendEvent::DeviceRemoved(_) => true` unconditionally — a grant scoped
+   to *only* keyboard input (e.g. `SyntheticInputGrant::new(origin)
+   .with_keyboard()`) could still call `submit_synthetic` with a
+   `DeviceAdded`/`DeviceRemoved` event and have it silently accepted and
+   applied to the registry, because `SyntheticInputGrant` has no field
+   scoping device management at all. This directly contradicted the
+   documented invariant in `crates/core/src/source.rs`: "There is
+   deliberately no `SyntheticInputGrant::unrestricted()`... every grant is
+   scoped to one origin and one event kind." Fixed by folding
+   `DeviceAdded`/`DeviceRemoved` into the same `=> false` arm as
+   `Tablet`/`Gamepad` (kinds no grant can cover), so synthetic hotplug is
+   denied outright rather than implicitly always-allowed. Physical hotplug
+   (the real path devices are added/removed through, via `InputService::
+   ingest`) is untouched — this only closes the synthetic-input side
+   channel. Proven by a new test,
+   `synthetic_device_added_and_removed_are_rejected_because_no_grant_scope_covers_device_management`
+   in `crates/core/tests/service.rs`, which fails against the pre-fix code
+   (`submit_synthetic` returned `Ok(())` and registered the spoofed device)
+   and passes after.

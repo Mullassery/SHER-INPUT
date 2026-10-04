@@ -28,6 +28,24 @@ third-party security review. Treat it accordingly:
   network access to fetch the RustSec advisory database. A dependency
   audit CI job has been added (see `.github/workflows/ci.yml`), but its
   first real run has not been observed to pass or fail yet.
+- **Device-access permission model: documented and now diagnosable, not silent.**
+  `LinuxBackend` opens `/dev/input/eventN` nodes directly — it has no logind/`libseat`
+  session handoff, so access is governed entirely by standard Unix file permissions
+  on those nodes (typically `GROUP="input"` or a udev `uaccess` tag granting the
+  active local session access; see `udev/70-sher-input.rules` for a minimal rule).
+  Without `input`-group membership (or an equivalent `uaccess` grant), opening a
+  device node fails with `EACCES`. The underlying `evdev` crate's `enumerate()`
+  silently omits any node it can't open — by design, with no error — which used to
+  mean a non-privileged user saw zero devices and zero explanation. This is now
+  diagnosed explicitly: `crates/linux/src/linux/backend.rs`'s `supervise` loop logs a
+  `tracing::warn!` (naming the specific inaccessible path and suggesting `input`-group
+  or udev-rule membership) for any `/dev/input/eventN` node present but unopenable,
+  and a `tracing::error!` if `/dev/input` itself can't even be listed. Neither case is
+  fatal — a backend that currently sees zero devices due to permissions keeps running
+  and will pick up devices that *are* accessible, including ones added later — but
+  neither is silent anymore either. There is still no multi-seat/session-aware device
+  handoff (no `logind`/`libseat` integration) — a deliberate Phase 1 scope limit, not
+  an oversight; see `ARCHITECTURE.md`'s "What's intentionally not here yet".
 - **The synthetic-input grant model enforces scope, not intent.**
   `SyntheticInputGrant` restricts a caller to one origin and one event kind
   (see `ARCHITECTURE.md`, "Synthetic input") — it stops a keyboard-only

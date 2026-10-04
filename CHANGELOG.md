@@ -12,6 +12,13 @@ Changes on `main` since the `v0.2.0` tag (`Cargo.toml` is at `0.3.0` but this
 has not been tagged as a release yet):
 
 ### Fixed
+- `LinuxBackend` no longer silently discovers zero devices with no explanation when
+  this process lacks permission to open `/dev/input/eventN` nodes. The `evdev` crate's
+  `enumerate()` drops any node it fails to open with no error at all; `supervise` now
+  separately scans `/dev/input` and logs a `tracing::warn!` naming the specific
+  inaccessible path (once per path, not every poll) plus a `tracing::error!` if
+  `/dev/input` itself can't be listed — both pointing at `input`-group/udev-rule
+  membership as the fix. See `SECURITY.md` and `udev/70-sher-input.rules`.
 - `InputService::submit_synthetic` no longer accepts synthetic
   `DeviceAdded`/`DeviceRemoved` events regardless of grant scope.
   `SyntheticInputGrant` has no field for device management (only
@@ -22,6 +29,10 @@ has not been tagged as a release yet):
   unaffected. See `ROADMAP_HONEST.md` item 9.
 
 ### Added
+- `udev/70-sher-input.rules`: a minimal, least-privilege example udev rule
+  (`uaccess`-tagged, scoped to `SUBSYSTEM=="input", KERNEL=="event*"` only) for
+  granting a logged-in session access to input event nodes, with a commented
+  group-based fallback for systems without `systemd-logind`.
 - `BackendHandle::is_finished()` (non-blocking liveness poll) and
   `stop_and_check_panicked()` (distinguishes a backend crash from a clean
   stop), so a caller can detect a dead backend and hot-restart it by calling

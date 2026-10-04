@@ -1,0 +1,24 @@
+# SHER-Input: grant access to evdev event nodes without broad, static group
+# membership.
+#
+# `TAG+="uaccess"` hands the device an ACL for whoever systemd-logind considers the
+# active local session — this is the same mechanism most distributions already use
+# for keyboards/mice (see /usr/lib/udev/rules.d/70-uaccess.rules) and is preferred
+# over group membership because it only grants access to a real, local, logged-in
+# session, not to this user's processes everywhere (a stale SSH session, a cron job,
+# etc.) the way a static group does.
+#
+# Scope is deliberately narrow: SUBSYSTEM=="input" + KERNEL=="event*" matches only
+# the /dev/input/eventN nodes sher_input_linux actually reads
+# (crates/linux/src/linux/backend.rs, reader.rs) — not /dev/input/js*, not
+# /dev/hidraw*, not any other node a broader "input"-ish match might sweep in.
+SUBSYSTEM=="input", KERNEL=="event*", TAG+="uaccess"
+
+# Fallback for systems without systemd-logind (no uaccess mechanism available):
+# group-based access instead. Commented out by default because group membership is
+# coarser than uaccess (applies to every session for this user, not just an active
+# local one) and requires a new login session to take effect after the user is added
+# to the group — uaccess has neither limitation. Uncomment this line (and run
+# `usermod -aG input <user>`) only if the uaccess rule above does not apply on your
+# system.
+#SUBSYSTEM=="input", KERNEL=="event*", GROUP="input", MODE="0660"

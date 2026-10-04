@@ -215,6 +215,12 @@ instance — the same test proves this resumes real event delivery on the same
   "Failure handling" above), there's no hot-restart: `supervise()` only polls for
   *new* devices every 500ms, it never retries a device whose reader thread already
   died. A dead device today stays dead until re-plugged.
+- Seat/session-aware device handoff (logind/`libseat`): `LinuxBackend` opens
+  `/dev/input/eventN` nodes directly under whatever Unix permissions apply (see
+  `udev/70-sher-input.rules`, `SECURITY.md`); it does not negotiate access through
+  `systemd-logind` or `libseat`, so there is no multi-seat support and no automatic
+  device release when a session is switched away from. Fine for a single-seat Phase 1
+  target; a real gap for multi-seat before this backend is used outside development.
 - Fuzzing at the SHER-Input/evdev boundary (external critique, verified real gap):
   no cargo-fuzz/proptest setup exists anywhere. Raw byte parsing of `/dev/input`
   happens inside the external `evdev` crate, not in SHER-Input's own code, so a

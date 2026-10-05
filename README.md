@@ -159,6 +159,24 @@ docker run --rm -v "$PWD":/work -w /work rust:latest \
            cargo clippy --workspace --all-targets -- -D warnings && cargo fmt --check"
 ```
 
+## Linux / Ubuntu compatibility
+
+Verified 2026-10 (see org-wide `SHER-LINUX-RUST-COMPATIBILITY.md`):
+
+- **Ubuntu**: 24.04 LTS and 26.04 LTS. Not just `cargo check` — the real test suite
+  (54 tests, including the Linux backend) was run in real Ubuntu Docker containers on
+  both arm64 (native) and x86_64 (emulated), as both root and a created non-root user.
+- **Architecture**: x86_64 and arm64, both confirmed. All wire-format/endianness handling
+  for `input_event` is delegated entirely to the `evdev` crate — this repo's own code has
+  zero manual struct-layout or endianness logic.
+- **Permissions**: a non-privileged user missing `input`-group/udev membership will now get
+  a clear warning naming the inaccessible device/directory (fixed this pass — previously
+  silent). A udev rule (`udev/70-sher-input.rules`) is shipped to grant the right access
+  automatically on systemd-based Ubuntu installs.
+- **Known limitations**: 500ms polling for new `/dev/input` nodes instead of inotify
+  (disclosed Phase-1 limitation, tracked in `ROADMAP_HONEST.md`); no dedicated ARM64 CI
+  runner yet (tested manually this pass, not yet automated in CI).
+
 ## Repository layout
 
 ```

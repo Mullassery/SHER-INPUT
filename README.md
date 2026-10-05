@@ -1,6 +1,7 @@
 # SHER Input
 
 [![CI](https://github.com/Mullassery/SHER-INPUT/actions/workflows/ci.yml/badge.svg)](https://github.com/Mullassery/SHER-INPUT/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 The input subsystem of the SHER platform: it turns physical device activity —
 keyboards, mice, touchscreens, tablets, game controllers — into a single canonical,
@@ -32,6 +33,25 @@ Aurora / Applications
 Full design rationale — layering, the canonical event model, ordering and coalescing
 guarantees, the capture and synthetic-input contracts — lives in
 [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
+| | |
+|---|---|
+| **Phase** | 1 of 5 (device discovery, normalization, sequencing, capture/synthetic-input contracts) |
+| **Real backend** | Linux/evdev — keyboard, pointer, scroll, hotplug |
+| **Not yet real** | touch, tablet, gamepad (types exist, Phase 4 deferral) |
+| **Tests** | 54 on Linux (36 platform-independent + 18 Linux-only), 36 elsewhere |
+| **License** | Apache 2.0 |
+
+## Contents
+
+- [Use cases](#use-cases)
+- [What's actually implemented](#whats-actually-implemented)
+- [See it run](#see-it-run)
+- [Building](#building)
+- [Linux / Ubuntu compatibility](#linux--ubuntu-compatibility)
+- [Repository layout](#repository-layout)
+- [Architectural boundary](#architectural-boundary)
+- [License](#license)
 
 ## Use cases
 
@@ -193,6 +213,21 @@ tests/           cross-crate contract tests
 Three crates, not nine. `sher_input_core` covers every device class's types from day
 one; a crate boundary exists only where it isolates something real — Linux-specific
 code, or test fixtures — not one per device class for its own sake.
+
+## The SHER family
+
+SHER-Input is one repo in a multi-repo platform. For discoverability (including by
+anyone or anything landing on just this repo), here are its siblings:
+
+- [**SHER-KERNEL**](https://github.com/Mullassery/SHER-KERNEL) — the foundation: capability-based security, scheduling, memory, and driver-runtime object model the rest of SHER builds on.
+- [**SHER-Process-Explorer**](https://github.com/Mullassery/SHER-Process-Explorer) — Linux process telemetry (`/proc`, perf, eBPF, cgroups, namespaces, containers).
+- [**SHER-Graphics**](https://github.com/Mullassery/SHER-Graphics) — graphics architecture: pure-Rust software GPU/reference driver, capability-secured runtime, Vulkan/ash FFI backend.
+- [**SHER-Display**](https://github.com/Mullassery/SHER-Display) — display server/compositor/window manager, with Wayland/X11 compatibility; the one sibling that depends on this repo (see below).
+- [**SHER-Aurora**](https://github.com/Mullassery/SHER-Aurora) — GNOME/GTK4-oriented Rust design system.
+
+Cargo-level coupling is narrower than this list — see "Architectural boundary" and
+"Cross-repo compatibility" below for exactly which of these this repo actually depends
+on at build time.
 
 ## Architectural boundary
 

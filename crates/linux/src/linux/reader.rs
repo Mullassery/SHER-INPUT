@@ -145,6 +145,20 @@ fn translate_batch(
             InputEventKind::Synchronization(_) => motion.flush(device_id, sink),
             // EV_ABS (touch/tablet), EV_MSC, EV_LED, ... : normalized in a later
             // phase (section 34); intentionally not translated yet.
+            //
+            // LIMITATION (documented, not a bug to fix here): this arm is a
+            // silent drop. Absolute-axis devices — touchscreens and drawing
+            // tablets — report their primary input as `EV_ABS` (`ABS_X`,
+            // `ABS_Y`, `ABS_PRESSURE`, ...), so no `Pointer`/`Touch`/`Tablet`
+            // `BackendEvent` is produced for them at all: a user touching a
+            // touchscreen sees nothing happen. Relative-axis devices (mouse)
+            // are unaffected. This is the deliberate Phase 4 deferral
+            // (`TabletTool`/`TabletEvent` in `sher_input_core::tablet` are
+            // defined but unimplemented); see README.md "Not feature-complete
+            // across device classes" and ARCHITECTURE.md "Phased scope" row 4.
+            // Do NOT implement `EV_ABS` here as a drive-by fix — the
+            // normalized absolute→`NormalizedPosition` mapping belongs with
+            // that phase's coordination work.
             _ => {}
         }
     }

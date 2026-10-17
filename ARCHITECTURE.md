@@ -221,6 +221,13 @@ instance — the same test proves this resumes real event delivery on the same
   `systemd-logind` or `libseat`, so there is no multi-seat support and no automatic
   device release when a session is switched away from. Fine for a single-seat Phase 1
   target; a real gap for multi-seat before this backend is used outside development.
+- Absolute-axis (`EV_ABS`) events from the Linux backend are silently dropped:
+  `LinuxBackend`'s reader translates `EV_REL`/`EV_KEY`/`EV_SYN` only; the catch-all
+  arm in `translate_batch` (crates/linux/src/linux/reader.rs) discards `EV_ABS`
+  (and `EV_MSC`/`EV_LED`). Touchscreens and drawing tablets report through
+  `EV_ABS`, so they produce no `Pointer`/`Touch`/`Tablet` events at all — a Phase 4
+  deferral (see "Phased scope" row 4 and `sher_input_core::tablet`), documented here
+  so it isn't mistaken for a translation bug.
 - Fuzzing at the SHER-Input/evdev boundary (external critique, verified real gap):
   no cargo-fuzz/proptest setup exists anywhere. Raw byte parsing of `/dev/input`
   happens inside the external `evdev` crate, not in SHER-Input's own code, so a

@@ -147,11 +147,6 @@ udev/            udev rule for device access on systemd-based Linux
 
 Full shipped/blocked/rejected detail: [`QUEUE_STATUS.md`](QUEUE_STATUS.md).
 
-## Queue status
-
-Shipped, blocked/failed, and rejected work for this repository is documented in
-[`QUEUE_STATUS.md`](QUEUE_STATUS.md).
-
 ## Contributing
 
 Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development workflow and the architectural rules this project holds to (self-contained canonical types; no backend-specific detail leaking across the boundary), and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). This is a single-maintainer project, so review happens on a best-effort basis rather than a fixed schedule; report security issues per [`SECURITY.md`](SECURITY.md).

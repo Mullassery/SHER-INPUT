@@ -137,6 +137,16 @@ udev/            udev rule for device access on systemd-based Linux
 - [`CHANGELOG.md`](CHANGELOG.md)
 - [`ROADMAP_HONEST.md`](ROADMAP_HONEST.md) — status and technical-debt audit
 
+## Known issues and deferred work
+
+**Blocked / failed:**
+- Touch/tablet/gamepad backends; hotplug latency.
+
+**Rejected / deferred:**
+- Non-Linux backends now; no demand.
+
+Full shipped/blocked/rejected detail: [`QUEUE_STATUS.md`](QUEUE_STATUS.md).
+
 ## Queue status
 
 Shipped, blocked/failed, and rejected work for this repository is documented in

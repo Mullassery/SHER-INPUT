@@ -18,6 +18,7 @@ pub mod ids;
 pub mod keyboard;
 pub mod pointer;
 pub mod registry;
+pub mod ring;
 pub mod service;
 pub mod source;
 pub mod tablet;
@@ -42,6 +43,7 @@ pub use pointer::{
     NormalizedPosition, PointerButton, PointerEvent, PointerState, PointerStateTable, ScrollAxis,
 };
 pub use registry::DeviceRegistry;
+pub use ring::{InputRingBuffer, PushError, RawInputEvent};
 pub use service::InputService;
 pub use source::{InputSource, SyntheticInputGrant, SyntheticOrigin};
 pub use tablet::{TabletEvent, TabletTool};

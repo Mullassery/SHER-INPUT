@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Before filing: check `ARCHITECTURE.md`'s "Phased scope" table and
-        "What's intentionally not here yet" section, and `ROADMAP_HONEST.md`
+        "What's intentionally not here yet" section, and `docs/internal/ROADMAP_HONEST.md`
         — a lot of missing functionality (touch/tablet/gamepad backends,
         `inotify`-based hotplug, driver sandboxing, fuzzing) is a known,
         already-documented gap rather than a bug.

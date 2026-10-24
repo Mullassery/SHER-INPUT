@@ -167,7 +167,7 @@ stream `InputService` produces. This repo's own tests prove the
 core↔SHER-Display contract with a hand-written mock router
 (`tests/tests/contract.rs`); the real `sher_display_input` crate lives in
 the sibling `SHER-Display` repo and is not built as part of this workspace
-(see `ROADMAP_HONEST.md` for exactly what has and hasn't been
+(see `docs/internal/ROADMAP_HONEST.md` for exactly what has and hasn't been
 cross-verified).
 
 ## Failure handling

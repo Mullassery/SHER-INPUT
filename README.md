@@ -135,7 +135,7 @@ udev/            udev rule for device access on systemd-based Linux
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
 - [`SECURITY.md`](SECURITY.md) — how to report a security issue
 - [`CHANGELOG.md`](CHANGELOG.md)
-- [`ROADMAP_HONEST.md`](ROADMAP_HONEST.md) — status and technical-debt audit
+- [`docs/internal/ROADMAP_HONEST.md`](docs/internal/ROADMAP_HONEST.md) — status and technical-debt audit
 
 ## Known issues and deferred work
 
@@ -145,7 +145,7 @@ udev/            udev rule for device access on systemd-based Linux
 **Rejected / deferred:**
 - Non-Linux backends now; no demand.
 
-Full shipped/blocked/rejected detail: [`QUEUE_STATUS.md`](QUEUE_STATUS.md).
+Full shipped/blocked/rejected detail: [`docs/internal/QUEUE_STATUS.md`](docs/internal/QUEUE_STATUS.md).
 
 ## Contributing
 

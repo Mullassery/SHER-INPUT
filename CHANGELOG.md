@@ -26,7 +26,7 @@ has not been tagged as a release yet):
   could previously still spoof a device into (or out of) the registry via
   the synthetic-input path — contradicting the documented "no
   `SyntheticInputGrant::unrestricted()`" invariant. Physical hotplug is
-  unaffected. See `ROADMAP_HONEST.md` item 9.
+  unaffected. See `docs/internal/ROADMAP_HONEST.md` item 9.
 
 ### Added
 - `udev/70-sher-input.rules`: a minimal, least-privilege example udev rule
@@ -91,7 +91,7 @@ has not been tagged as a release yet):
 - `sher-input-monitor`: diagnostic CLI, `--simulate` mode.
 - Initial test suite and `ARCHITECTURE.md`.
 
-### Known incomplete / not started (see [ROADMAP_HONEST.md](ROADMAP_HONEST.md))
+### Known incomplete / not started (see [docs/internal/ROADMAP_HONEST.md](docs/internal/ROADMAP_HONEST.md))
 Touch, tablet, and gamepad backends (types exist, no implementation — Phase
 4); SHER-Display focus/pointer-targeting/capture integration (Phase 2 — this
 repo's own tests prove the contract against a mock router only); Aurora

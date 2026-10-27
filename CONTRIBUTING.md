@@ -29,7 +29,7 @@ crossed.
 ## Development setup
 
 ```bash
-git clone https://github.com/Mullassery/SHER-INPUT SHER-Input
+git clone ../SHER-INPUT SHER-Input
 cd SHER-Input
 cargo build --workspace
 cargo test --workspace
